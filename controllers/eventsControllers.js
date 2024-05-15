@@ -1,8 +1,9 @@
 // import contactsService from "../services/contactsServices.js";
 const fs = require("fs/promises");
 const events = require("../models/events.js")
-// const { nanoid } = require("nanoid");
+const { HttpError, ctrlWrapper } = require("../helpers/index");
 const path = require("path");
+const { addShema } = require("../JoiSchemas/index.js");
 const getListEvent = async (req, res) => {
   const result = await events.listEvents();
   res.json(result);
@@ -18,10 +19,6 @@ const getByIdEvent = async (req, res) => {
 };
 
 const addEvent = async (req, res) => {
-  const { error } = addShema.validate(req.body);
-  if (error) {
-    throw HttpError(400, "missing required name field");
-  }
   const result = await events.addEvent(req.body);
   res.status(201).json(result);
 };
@@ -38,10 +35,6 @@ const removeByIdEvent = async (req, res) => {
 };
 
 const updateEvent = async (req, res) => {
-  const { error } = addShema.validate(req.body);
-  if (error) {
-    throw HttpError(400, "missing fields");
-  }
   const { eventId } = req.params;
   const result = await events.updateEvent(eventId, req.body);
   if (!result) {
@@ -50,9 +43,9 @@ const updateEvent = async (req, res) => {
   res.json(result);
 };
 module.exports = {
-  getListEvent,
-  getByIdEvent,
-  removeByIdEvent,
-  addEvent,
-  updateEvent,
+  getListEvent: ctrlWrapper(getListEvent),
+  getByIdEvent: ctrlWrapper(getByIdEvent),
+  removeByIdEvent: ctrlWrapper(removeByIdEvent),
+  addEvent: ctrlWrapper(addEvent),
+  updateEvent: ctrlWrapper(updateEvent),
 };
